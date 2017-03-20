@@ -3,17 +3,16 @@
 
 #include "globals.hpp"
 
-#include <deal.II/fe/mapping_q.h>
-#include <deal.II/integrators/divergence.h>
-#include <deal.II/integrators/l2.h>
-#include <deal.II/integrators/laplace.h>
-#include <deal.II/lac/lapack_full_matrix.h>
+#include <deal.II/base/point.h>
+#include <deal.II/base/types.h>
+#include <deal.II/base/quadrature.h>
+#include <deal.II/meshworker/local_integrator.h>
 #include <deal.II/meshworker/dof_info.h>
 #include <deal.II/meshworker/integration_info.h>
-#include <deal.II/meshworker/loop.h>
-#include <deal.II/meshworker/output.h>
-#include <deal.II/meshworker/simple.h>
+#include <deal.II/fe/mapping_q.h>
+#include <deal.II/lac/lapack_full_matrix.h>
 
+#include <map>
 
 namespace elas{
 namespace LDGIntegrator{
@@ -23,7 +22,7 @@ class LDGIntegrator: public dealii::MeshWorker::LocalIntegrator<dim>
 {
 public:
   LDGIntegrator
-  (dealii::Point<dim> referenceDirection_In,
+  (dealii::Tensor<1,dim> referenceDirection_In,
    const dealii::Quadrature<dim-1> & face_quadrature_In,
    const dealii::UpdateFlags & update_flags,
    const dealii::MappingQ<dim,dim> & mapping_In,
@@ -58,7 +57,7 @@ private:
   const dealii::Point<dim> referenceDirection;
   const dealii::SmartPointer<const dealii::Quadrature<dim-1> > face_quadrature;
   const dealii::UpdateFlags face_update_flags;
-  const dealii::MappingQ1<dim,dim> mapping;
+  const dealii::MappingQ<dim,dim> mapping;
   std::map<dealii::types::boundary_id, elas::myBoundaryID> const * const BoundaryIDMap;
     
 };

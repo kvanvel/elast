@@ -11,6 +11,7 @@ elasRHS<dim>::value (const dealii::Point<dim> &p) const
   for(unsigned int i = 1; i<dim; ++i){
     value[i] = 1.0+0.8*std::sin(8*dealii::numbers::PI*p[0]);
     value[i] = 1.0;
+    value[i] = 0;
   }
   return value;
 }

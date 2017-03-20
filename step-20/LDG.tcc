@@ -20,7 +20,8 @@ massSigma
   AssertDimension(tau_in_sigma_in.n(), n_sigma_dofs);
   AssertDimension(fe_sigma_Self.get_fe().n_components(), (dim * dim + dim ) /2 );
 
-  std::vector<dealii::SymmetricTensor<4,dim > > compliance_values (fe_sigma_Self.n_quadrature_points);
+  std::vector<dealii::SymmetricTensor<4,dim > >
+    compliance_values (fe_sigma_Self.n_quadrature_points);
   elas::Compliance<dim> compliance;
 
   compliance.value_list(fe_sigma_Self.get_quadrature_points(),
@@ -264,8 +265,6 @@ numericalFluxSigmaFromU
   const unsigned int n_tau_dofs = fe_tau_Self.dofs_per_cell;
   const unsigned int n_U_dofs = fe_U_Self.dofs_per_cell;
 
-  
-  
   AssertDimension(n_tau_dofs, fe_tau_Neig.dofs_per_cell);
   AssertDimension(n_U_dofs, fe_U_Neig.dofs_per_cell );
   
@@ -293,7 +292,7 @@ numericalFluxSigmaFromU
   {  // From insider's perspective
     
     const auto & JxW = fe_tau_Self.get_JxW_values();
-    const auto & normals = fe_tau_Self.get_normal_vectors();
+    const auto & normals = fe_tau_Self.get_all_normal_vectors();
   
     for(unsigned int point = 0;
 	point < fe_U_Self.n_quadrature_points;
@@ -325,7 +324,7 @@ numericalFluxSigmaFromU
 
   { //From outsider's perspective 
     const auto & JxW = fe_tau_Neig.get_JxW_values();
-    const auto & normals = fe_tau_Neig.get_normal_vectors();
+    const auto & normals = fe_tau_Neig.get_all_normal_vectors();
 
     for(unsigned int point = 0; point < fe_tau_Neig.n_quadrature_points; ++point){
       const auto & normalVector = fe_tau_Neig.normal_vector(point);
@@ -346,7 +345,6 @@ numericalFluxSigmaFromU
 	  }
 	}
       } else {
-	//std::cout << "Here" << std::endl;
 	for(unsigned int i = 0; i < fe_tau_Neig.dofs_per_cell; ++i){
 	  for(unsigned int j = 0; j < fe_U_Neig.dofs_per_cell; ++j){
 	    tau_out_U_out(i,j) +=
@@ -500,7 +498,7 @@ numericalFluxSigmaFromUBoundary
   const dealii::FEValuesExtractors::Vector displacements(0);
 
   const auto & JxW = fe_tau_Self.get_JxW_values();
-  const auto & normals = fe_tau_Self.get_normal_vectors();
+  const auto & normals = fe_tau_Self.get_all_normal_vectors();
   
   for(unsigned int point = 0;
       point < fe_U_Self.n_quadrature_points;
@@ -612,7 +610,7 @@ numericalFluxUFromSigma
   {  // From insider's perspective
     
     const auto & JxW = fe_V_Self.get_JxW_values();
-    const auto & normals = fe_V_Self.get_normal_vectors();
+    const auto & normals = fe_V_Self.get_all_normal_vectors();
   
     for(unsigned int point = 0;
 	point < fe_V_Self.n_quadrature_points;
@@ -646,7 +644,7 @@ numericalFluxUFromSigma
   { //From outsider's perspective 
 
     const auto & JxW = fe_V_Neig.get_JxW_values();
-    const auto & normals = fe_V_Neig.get_normal_vectors();
+    const auto & normals = fe_V_Neig.get_all_normal_vectors();
 
     for(unsigned int point = 0; point < fe_V_Neig.n_quadrature_points; ++point){
       const auto & normalVector = fe_V_Neig.normal_vector(point);      
@@ -810,7 +808,7 @@ numericalFluxUFromSigmaBoundary
   const dealii::FEValuesExtractors::Vector displacements(0);
 
   const auto & JxW = fe_V_Self.get_JxW_values();
-  const auto & normals = fe_V_Self.get_normal_vectors();
+  const auto & normals = fe_V_Self.get_all_normal_vectors();
 
   for(unsigned int point = 0;
       point < fe_V_Self.n_quadrature_points;
@@ -887,7 +885,7 @@ sigma_MinusRHS_FromDirPlus
 
   const dealii::FEValuesExtractors::SymmetricTensor<2> stress(0);
 
-  const auto & normals = fe_sigma_Self.get_normal_vectors();
+  const auto & normals = fe_sigma_Self.get_all_normal_vectors();
   const auto & JxW = fe_sigma_Self.get_JxW_values();
   for(unsigned int point = 0; point < fe_sigma_Self.n_quadrature_points; ++point){
     Assert(referenceDirection * normals[point] > 0.0, dealii::ExcInternalError() );    
@@ -911,7 +909,7 @@ U_MinusRHS_FromNueMinus
   const elas::NueBC<dim> nueBC;
   const dealii::FEValuesExtractors::Vector displacements(0);
   
-  const auto & normals = fe_U_Self.get_normal_vectors();
+  const auto & normals = fe_U_Self.get_all_normal_vectors();
   const auto & JxW = fe_U_Self.get_JxW_values();
   for(unsigned int point = 0; point < fe_U_Self.n_quadrature_points; ++point){
     Assert( referenceDirection * normals[point] < 0.0, dealii::ExcInternalError() );
@@ -945,7 +943,7 @@ ConstraintUDirMinus
   const elas::DirBC<dim> dirBC;
   const dealii::FEValuesExtractors::Vector displacements(0);
   const auto & JxW = fe_U_Self.get_JxW_values();
-  const auto & normals = fe_U_Self.get_normal_vectors();
+  const auto & normals = fe_U_Self.get_all_normal_vectors();
   for(unsigned int point = 0; point < fe_U_Self.n_quadrature_points; ++point){
     Assert(referenceDirection * normals[point] < 0.0, dealii::ExcInternalError() );
     for(unsigned int i = 0; i < fe_U_Self.dofs_per_cell; ++i){
@@ -968,7 +966,7 @@ void Constraint_sigma_NuePlus
 {
   const elas::NueBC<dim> nueBC;
   const auto & JxW = fe_U_Self.get_JxW_values();
-  const auto & normals = fe_U_Self.get_normal_vectors();
+  const auto & normals = fe_U_Self.get_all_normal_vectors();
   const dealii::FEValuesExtractors::Vector displacements(0);
 
   for(unsigned int point = 0; point < fe_U_Self.n_quadrature_points; ++point){
@@ -1005,7 +1003,7 @@ BoundaryMassU
 
 
   const auto & JxW = fe_U_Self.get_JxW_values();
-  const auto & normals = fe_U_Self.get_normal_vectors();
+  const auto & normals = fe_U_Self.get_all_normal_vectors();
 
   for(unsigned int point = 0;
       point < fe_U_Self.n_quadrature_points;
@@ -1015,6 +1013,8 @@ BoundaryMassU
       for(unsigned int j = 0; j < fe_U_Self.dofs_per_cell; ++j){
 	U_in_U_in(i,j) +=
 	  JxW[point] * fe_U_Self[displacements].value(i,point) * fe_U_Self[displacements].value(j,point);
+	//std::cout << fe_U_Self[displacements].value(i,point) << std::endl;
+	
       }
     }
   }
@@ -1038,7 +1038,7 @@ BoundaryMassSigma
   const dealii::FEValuesExtractors::SymmetricTensor<2> stress(0);
   
   const auto & JxW = fe_sigma_Self.get_JxW_values();
-  const auto & normals = fe_sigma_Self.get_normal_vectors();
+  const auto & normals = fe_sigma_Self.get_all_normal_vectors();
 
   for(unsigned int point = 0;
       point < fe_sigma_Self.n_quadrature_points;
@@ -1075,7 +1075,7 @@ SigmaJump (const dealii::FEValuesBase<dim> & fe_sigma_self,
   const dealii::FEValuesExtractors::SymmetricTensor<2> stress(0);
 
   const auto & JxW = fe_sigma_self.get_JxW_values();
-  const auto & normals = fe_sigma_self.get_normal_vectors();  
+  const auto & normals = fe_sigma_self.get_all_normal_vectors();  
 
   for(unsigned int point = 0;
       point < fe_sigma_self.n_quadrature_points;
@@ -1136,8 +1136,6 @@ CellResidualSigma
     normSquaredOfCellResidual = partial_sum;
   }  
 }
-
-
 
 } //End namespace LDG
 } //End namespace LocalIntegrators

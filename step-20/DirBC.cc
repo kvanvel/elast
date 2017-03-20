@@ -3,12 +3,19 @@
 namespace elas{
 
 template <int dim>
+inline
 dealii::Tensor<1,dim>
 DirBC<dim>::value (const dealii::Point<dim> &p) const
 {
   dealii::Tensor<1,dim> value;
   for(unsigned int i = 0; i < dim; ++i){
-    value[i] = p[i];
+      value[i] = 0.0;
+  }
+  
+  if(p[0] < 0.0){
+    //do nothing;
+  } else {
+    value[0] = 1.00;
   }
   return value;
 }

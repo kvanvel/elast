@@ -1,7 +1,8 @@
 #ifndef _H_ELASRHS__
 #define _H_ELASRHS__
 
-#include "globals.hpp"
+#include <deal.II/base/point.h>
+#include <deal.II/base/tensor_function.h>
 
 namespace elas {
 

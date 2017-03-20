@@ -8,7 +8,9 @@ NueBC<dim>::value(const dealii::Point<dim> &p) const
 {
   dealii::SymmetricTensor<2,dim> value;
   for(unsigned int i = 0; i < dim; ++i){
-    value[i][i] = 0.0;
+    for(unsigned int j = i; j < dim; ++j){
+      value[i][j] = 0.0;
+    }
   }
   return value;
 }

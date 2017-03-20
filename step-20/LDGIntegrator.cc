@@ -6,7 +6,8 @@ namespace LDGIntegrator{
 
 template <int dim>
 LDGIntegrator<dim>::LDGIntegrator
-(dealii::Point<dim> referenceDirection_In, //Why not const reference?
+(
+ dealii::Tensor<1,dim>  referenceDirection_In, //Why not const reference?
  const dealii::Quadrature<dim-1> & face_quadrature_In,
  const dealii::UpdateFlags & face_update_flags_In,
  const dealii::MappingQ<dim,dim> & mapping_In,
@@ -29,9 +30,12 @@ LDGIntegrator<dim>::cell(dealii::MeshWorker::DoFInfo<dim> & dinfo,
   const elas::real minusOne = -1.0;
 
   //mass Sigma
+  
   elas::LocalIntegrators::LDG::massSigma(dinfo.matrix(0,false).matrix,
-                                         info.fe_values(0),
-                                         one);
+					 info.fe_values(0),
+					 one);
+
+    
   //Invert the local mass matrix and insert it into the global inverse mass matrix  
   
   {
@@ -41,7 +45,7 @@ LDGIntegrator<dim>::cell(dealii::MeshWorker::DoFInfo<dim> & dinfo,
   tempLAPACKMatrix.copy_from(dinfo.matrix(0,false).matrix);
   tempLAPACKMatrix.invert();
   dinfo.matrix(5,false).matrix = tempLAPACKMatrix;
-  //dinfo.matrix(5,false).matrix.symmetrize(); //We are being really safe;
+  dinfo.matrix(5,false).matrix.symmetrize(); //We are being really safe;
   
   }
   
@@ -89,31 +93,31 @@ LDGIntegrator<dim>::cell(dealii::MeshWorker::DoFInfo<dim> & dinfo,
   	break;
       case elas::myBoundaryID::dir_Minus:
   	elas::LocalIntegrators::LDG::BoundaryMassU(referenceDirection,
-						   fe_face_U,
-						   dinfo.matrix(3,false) );
+  						   fe_face_U,
+  						   dinfo.matrix(3,false) );
 
-	std::cout << "On dir_minus" << std::endl;
-	elas::LocalIntegrators::LDG::ConstraintUDirMinus(referenceDirection,
-							 fe_face_U,
-							 dinfo.vector(1).block(1) );
+  	std::cout << "On dir_minus" << std::endl;
+  	elas::LocalIntegrators::LDG::ConstraintUDirMinus(referenceDirection,
+  							 fe_face_U,
+  							 dinfo.vector(1).block(1) );
 							 
 							 
 	
   	break;
       case elas::myBoundaryID::nue_Plus:
-	std::cout << "On Neu_plus" << std::endl;
-	elas::LocalIntegrators::LDG::BoundaryMassSigma(referenceDirection,
-						       fe_face_sigma,
-						       dinfo.matrix(4,false) );
+  	std::cout << "On Neu_plus" << std::endl;
+  	elas::LocalIntegrators::LDG::BoundaryMassSigma(referenceDirection,
+  						       fe_face_sigma,
+  						       dinfo.matrix(4,false) );
 
 	
 
-	elas::LocalIntegrators::LDG::Constraint_sigma_NuePlus(referenceDirection,
-							    fe_face_sigma,
-							    dinfo.vector(1).block(0) );
+  	elas::LocalIntegrators::LDG::Constraint_sigma_NuePlus(referenceDirection,
+							      fe_face_sigma,
+							      dinfo.vector(1).block(0) );
 						       
-	// elas::LocalIntegrators::LDG::BoundaryMassU(referenceDirection,
-						   // 					   dinfo.matrix(4,false), 
+  	// elas::LocalIntegrators::LDG::BoundaryMassU(referenceDirection,
+  						   // 					   dinfo.matrix(4,false), 
   	// 					   fe_face_U);
   	break;
       case elas::myBoundaryID::nue_Minus:
@@ -144,8 +148,8 @@ LDGIntegrator<dim>::cell(dealii::MeshWorker::DoFInfo<dim> & dinfo,
     //Apply scaling, we have to do this because of problems when the mesh is very finely refined
     //We can't just assume that singular values on the order of 1e-13 are supposed to be zero.
 
-    elas::real zero = 0.0;
-    elas::real one = 1.0;
+    const elas::real zero = 0.0;
+    const elas::real one = 1.0;
 
     elas::real scaling = vectorOfSingularValues.linfty_norm();
     if(scaling > zero){
@@ -183,8 +187,8 @@ LDGIntegrator<dim>::cell(dealii::MeshWorker::DoFInfo<dim> & dinfo,
     //Apply scaling, we have to do this because of problems when the mesh is very finely refined
     //We can't just assume that singular values on the order of 1e-13 are supposed to be zero.
 
-    elas::real zero = 0.0;
-    elas::real one = 1.0;
+     const elas::real zero = 0.0;
+     const elas::real one = 1.0;
 
     elas::real scaling = vectorOfSingularValues.linfty_norm();
     if(scaling > zero){
@@ -211,6 +215,8 @@ LDGIntegrator<dim>::face(dealii::MeshWorker::DoFInfo<dim> & dinfoSELF,
 			 dealii::MeshWorker::DoFInfo<dim> & dinfoNEIG,
 			 dealii::MeshWorker::IntegrationInfo<dim> &infoSELF,
 			 dealii::MeshWorker::IntegrationInfo<dim> &infoNEIG ) const {
+
+  
 
 
   elas::LocalIntegrators::LDG::numericalFluxSigmaFromU

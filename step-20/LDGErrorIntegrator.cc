@@ -2,11 +2,11 @@
 #include "LDG.hpp"
 
 namespace elas{
-namespace LDGErrorIntegrator{
+namespace LDGErrorIntegrator {
+
 
 template<int dim>
-LDGErrorIntegrator<dim>::LDGErrorIntegrator
-(dealii::Point<dim> referenceDirection_In)
+LDGErrorIntegrator<dim>::LDGErrorIntegrator()
   :
   dealii::MeshWorker::LocalIntegrator<dim>(true, true, true)  
 {}
@@ -45,10 +45,7 @@ LDGErrorIntegrator<dim>::cell
 					  local_dof_indices_Sigma.end(),
 					  local_dofs_Sigma.begin() );
 
-  for(unsigned int i = 0; i < local_dofs_Sigma.size(); ++i){    
-    //std::cout << "local_dofs_Sigma[" << i << "] = " << local_dofs_Sigma[i] << std::endl;
-  }
-
+  
   SolutionVectorPtr->extract_subvector_to(local_dof_indices_U.begin(),
 					  local_dof_indices_U.end(),
 					  local_dofs_U.begin() );
@@ -158,8 +155,10 @@ LDGErrorIntegrator<dim>::boundary(dealii::MeshWorker::DoFInfo<dim> & dinfo,
 				  dealii::MeshWorker::IntegrationInfo<dim> & info) const
 {}
 
+
 } // End Namespace LDGErrorIntegrator
-} // End Namespace heat
+} // End Namespace elas
+
 
 template class elas::LDGErrorIntegrator::LDGErrorIntegrator<2>;
 template class elas::LDGErrorIntegrator::LDGErrorIntegrator<3>;
